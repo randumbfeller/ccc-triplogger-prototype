@@ -10,15 +10,29 @@ const CUSTOMERS = ["CCC","Windish","Trotter"];
 const MATERIALS = ["rock","sand","dirt"];
 const PICKUPS = ["Quarry A","Quarry B","Yard C"];
 
-const theme = { orange:"#F5821E", green:"#28a745", red:"#dc3545", white:"#FFF", border:"#E3E3E3", pad:n=>n*8 };
-const pad2 = n => String(n).padStart(2,"0");
-const fmt = ts => { if(!ts) return ""; const d=new Date(ts); return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`; };
-const toCSV = trips => ["Driver,Truck,Customer,Material,Pickup,Delivery,Start Odo,Start,End", ...trips.map(t=>[
-  t.driver,t.truck,t.customer,t.material,t.pickup,(t.delivery||"").replace(/,/g,";"),t.odom||"",fmt(t.startedAt),fmt(t.endedAt)
-].join(","))].join("\n");
+const theme = { orange:"#F5821E", green:"#28a745", red:"#dc3545", white:"#FFF", border:"#E3E3E3", pad:(n:number)=>n*8 };
+const pad2 = (n:number) => String(n).padStart(2,"0");
+const fmt = (ts?: number | null) => {
+  if(!ts) return "";
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+};
+const toCSV = (trips: any[]) =>
+  ["Driver,Truck,Customer,Material,Pickup,Delivery,Start Odo,Start,End",
+   ...trips.map(t=>[
+     t.driver,t.truck,t.customer,t.material,t.pickup,(t.delivery||"").replace(/,/g,";"),t.odom||"",fmt(t.startedAt),fmt(t.endedAt)
+   ].join(","))].join("\n");
 
 /** Inline dropdown with placeholders + black/white menu + orange selected. */
-function InlineDropdown({ label, value, options, onChange, placeholder }) {
+function InlineDropdown({
+  label, value, options, onChange, placeholder
+}: {
+  label: string;
+  value: string;
+  options: string[];
+  onChange: (v: string) => void;
+  placeholder: string;
+}) {
   const [open, setOpen] = useState(false);
   const showPlaceholder = !value;
   return (
@@ -79,9 +93,9 @@ export default function App() {
   const [material, setMaterial] = useState("");
   const [customer, setCustomer] = useState("");
 
-  const [startedAt, setStartedAt] = useState(null);
-  const [trips, setTrips] = useState([]);
-  const [view, setView] = useState("form"); // "form" | "list" | "csv"
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [trips, setTrips] = useState<any[]>([]);
+  const [view, setView] = useState<"form"|"list"|"csv">("form");
   const [csv, setCsv] = useState("");
 
   const validateAll = () => {
@@ -226,7 +240,7 @@ export default function App() {
           <FlatList
             contentContainerStyle={{ padding: theme.pad(2) }}
             data={trips}
-            keyExtractor={(t)=>t.id}
+            keyExtractor={(t:any)=>t.id}
             ListEmptyComponent={<Text style={{ textAlign:"center", marginTop: theme.pad(4), fontSize:16 }}>No trips yet.</Text>}
             renderItem={({item})=>(
               <View style={styles.card}>
@@ -263,13 +277,13 @@ export default function App() {
   );
 }
 
-const Tab = ({ text, active, onPress }) => (
+const Tab = ({ text, active, onPress }: {text:string; active:boolean; onPress:()=>void}) => (
   <Pressable onPress={onPress} style={[styles.tab, active && styles.tabActive]}>
     <Text style={[styles.tabText, active && { color: "#FFF" }]}>{text}</Text>
   </Pressable>
 );
 
-const Row = ({ k, v }) => (
+const Row = ({ k, v }: {k:string; v:any}) => (
   <View style={{ flexDirection:"row", marginBottom:6 }}>
     <Text style={{ fontWeight:"700", fontSize:16 }}>{k}: </Text>
     <Text style={{ fontSize:16 }}>{String(v || "")}</Text>
@@ -314,3 +328,4 @@ const styles = StyleSheet.create({
   btn:{ flex:1, alignItems:"center", paddingVertical: theme.pad(1.75), borderRadius:12 },
   btnText:{ fontWeight:"900", fontSize:18 },
 });
+
